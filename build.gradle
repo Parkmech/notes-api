@@ -1,0 +1,83 @@
+plugins {
+    id 'com.palantir.docker-run' version '0.32.0'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'jacoco'
+    id "org.flywaydb.flyway" version "8.2.0"
+    id 'org.springframework.boot' version '2.6.2'
+}
+
+group = 'edu.byu.is590R.bwh5'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+ext {
+    jacocoToolVersion = '0.8.7'
+}
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'com.auth0:java-jwt:3.18.3'
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'commons-codec:commons-codec'
+    implementation 'mysql:mysql-connector-java:8.0.25'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.6'
+    runtimeOnly 'mysql:mysql-connector-java'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacoco {
+    toolVersion = jacocoToolVersion
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.enabled true
+        csv.enabled true
+        html.enabled true
+    }
+    finalizedBy jacocoTestCoverageVerification
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            enabled = true
+            limit {
+                minimum = 0.75
+            }
+        }
+    }
+}
+
+dockerRun {
+    name 'notes-mysql'
+    image 'mysql:latest'
+    ports '3306:3306'
+    env 'MYSQL_ROOT_PASSWORD': 'mypass'
+    clean true
+}
